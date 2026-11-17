@@ -4,6 +4,8 @@
 
 Bills is a personal finance application you will build while learning PHP and Laravel. These documents describe a starting design, not a claim about working software.
 
+Bills is a new project, separate from the old MoneyWise project. The planned stack is PHP, Laravel, PostgreSQL, React, TypeScript, Inertia.js, and Tailwind CSS in **one Laravel application**, starting from Laravel's official React starter kit when implementation begins. The initial MVP (minimum viable product) will use **JPY only**. See the architecture and database documents for the starter-kit source and the monetary decisions required before migrations.
+
 ## Start here
 
 1. [Project overview and planned features](01-project-overview.md)
@@ -15,7 +17,7 @@ Bills is a personal finance application you will build while learning PHP and La
 
 Read them in this order: understand the problem, follow a user's journey, see how the pieces connect, then study the data and learning steps.
 
-## Inspection snapshot
+## Original inspection snapshot (before documentation was added)
 
 On November 17, 2026, the Bills workspace contained:
 
@@ -31,7 +33,11 @@ Bills/
 
 The existing README names PHP + Laravel, PostgreSQL, React + TypeScript, and Tailwind CSS, and marks the project as Planning. No application source, dependency manifests, migrations, or tests were found. The Git working tree was clean before documentation was added. No applicable AGENTS.md instructions were found in the workspace or its checked parent directories.
 
-Only new documentation files were created for this task. The existing README and .gitignore were preserved. No dependencies were installed, application code generated, old MoneyWise project accessed or modified, or commits/pushes performed.
+The original task created only these planning documents. This refinement changes only existing files in `docs/`. The root README and .gitignore are preserved. No dependencies are installed, application code generated, old MoneyWise project accessed or modified, or commits/pushes performed as part of either documentation task.
+
+## Planned first functional milestone
+
+**Log in → create an account → record an expense → view the updated account balance.** First-time category setup is offered but can be skipped, because transactions may be uncategorized. Showing the balance on the account page completes this milestone; the full dashboard comes later. Automated tests accompany each feature as it is implemented, rather than waiting for a separate testing phase.
 
 ## How to read the diagrams
 

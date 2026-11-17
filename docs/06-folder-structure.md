@@ -2,19 +2,19 @@
 
 **Status: the application folders and files below are planned examples. Only the documentation exists today; this tree is not an instruction to generate code now.**
 
-Use one repository and one Laravel application, with React inside Laravel's resources folder. This follows the proposed Inertia architecture and avoids managing two independent applications while learning.
+Use **Laravel's official React starter kit** when implementation begins: one repository and one Laravel application, with Inertia.js and React inside Laravel's resources folder. Retain the selected kit's generated conventions and authentication files. Do not generate or move files to match this diagram now.
+
+The documented frontend organization includes `components`, `hooks`, `layouts`, `lib`, `pages`, and `types` under `resources/js`. Sources: [official starter-kit documentation](https://laravel.com/docs/starter-kits#react) and [official React starter-kit repository](https://github.com/laravel/react-starter-kit). Recheck the chosen stable kit at setup time; no framework version is pinned here.
 
 ```text
 Bills/
 ├── app/
-│   ├── Actions/
-│   │   └── Bills/                 # Planned record/undo payment operations
 │   ├── Http/
 │   │   ├── Controllers/           # Planned request coordination
-│   │   ├── Middleware/            # Planned cross-request checks
+│   │   ├── Middleware/            # Planned kit-provided request middleware
 │   │   └── Requests/              # Planned form validation
 │   ├── Models/                    # Planned User, Account, Category, etc.
-│   └── Policies/                  # Planned ownership/access decisions
+│   └── Policies/                  # Planned domain ownership checks, added as needed
 ├── bootstrap/                     # Planned framework startup
 ├── config/                        # Planned server configuration
 ├── database/
@@ -27,23 +27,27 @@ Bills/
 │   ├── css/                       # Planned CSS and Tailwind entry point
 │   ├── js/
 │   │   ├── components/            # Planned reusable UI pieces
+│   │   ├── hooks/                 # Planned kit-provided React hooks
 │   │   ├── layouts/               # Planned shared page frames
+│   │   ├── lib/                   # Planned kit-provided utilities
 │   │   ├── pages/
+│   │   │   ├── auth/              # Planned kit-provided authentication pages
+│   │   │   ├── settings/          # Planned kit-provided settings pages
+│   │   │   ├── dashboard.tsx      # Planned kit page, adapted at dashboard milestone
 │   │   │   ├── accounts/          # Planned account pages
 │   │   │   ├── bills/             # Planned reminder pages
 │   │   │   ├── budgets/           # Planned monthly budget pages
 │   │   │   ├── categories/        # Planned category pages
-│   │   │   ├── dashboard/         # Planned summary page
 │   │   │   └── transactions/      # Planned entry/history pages
 │   │   ├── types/                 # Planned shared page-data types
-│   │   └── app.tsx                # Planned React/Inertia entry point
+│   │   └── app.tsx                # Planned React/Inertia.js entry point
 │   └── views/                     # Planned Laravel HTML root view
 ├── routes/
 │   └── web.php                    # Planned browser routes
 ├── storage/                       # Planned private runtime files and logs
 ├── tests/
-│   ├── Feature/                   # Planned request/database behavior tests
-│   └── Unit/                      # Planned isolated logic tests when useful
+│   ├── Feature/                   # Planned tests added with each feature
+│   └── Unit/                      # Planned exact calculation tests when useful
 ├── .env                           # Planned local secrets; must remain ignored
 ├── .env.example                   # Planned configuration names/placeholders
 ├── .gitignore                     # Existing ignore rules
@@ -53,20 +57,20 @@ Bills/
 └── vite.config.ts                 # Planned frontend build configuration
 ```
 
-This is a conceptual subset, not a complete Laravel skeleton. A future starter may provide different capitalization, authentication folders, entry points, or build filenames. Keep its conventions unless there is a concrete reason to change them; do not create parallel folders just to match this illustration. Authentication pages and framework support files are omitted for readability.
+This is a relevant subset of the planned starter-kit application, not a complete skeleton or a list of folders to create. Starter-kit contents can change: keep its actual filenames, capitalization, authentication support, generated helpers, and build configuration. Domain page folders (`accounts`, `categories`, `transactions`, `budgets`, and `bills`) are proposed additions only when their milestone is implemented. Adapt the supplied dashboard page later instead of creating a second dashboard folder. Other kit support files are omitted for readability.
 
 ## Why put things here?
 
 - `routes/web.php` maps browser URLs to handlers. Keep financial business rules out of route definitions so the request map stays readable.
 - Controllers coordinate a request; Form Requests check input; policies decide permission. Each location has one understandable responsibility.
 - Models represent stored records and relationships. Migrations describe how tables change over time; editing a model does not automatically change PostgreSQL.
-- `Actions/Bills` is a proposed small custom folder for payment operations that must update multiple records together. Add it when those operations exist, rather than building an abstract service framework in advance.
+- Keep record/undo bill-payment operations in the relevant controller initially, with validation, authorization, a database transaction, and bill row locking. Do not pre-create custom Actions, Services, or Repositories. If the kit already supplies authentication-specific action classes, retain them; those are not a reason to add a Bills action layer.
 - React pages correspond to screens. Components are smaller reusable pieces, and layouts supply shared navigation and page structure. Start with a few components and extract repetition as it appears.
-- Shared TypeScript types describe data sent to the browser. They should not include server-only fields such as password hashes, and they do not replace PHP validation.
+- `hooks` and `lib` retain the starter kit's supplied code; add to them only for concrete needs. Shared TypeScript types describe allowed page data, including canonical whole-yen strings for JPY amounts. They should not include server-only fields such as password hashes, and they do not replace PHP validation.
 - Keep public assets in `public/` and private runtime data in `storage/`. A future server should expose Laravel's public directory, not the whole repository.
-- Feature tests check complete behaviors such as rejecting another user's transaction. Unit tests are useful when a calculation or rule can be tested independently.
+- Add feature tests alongside authentication, accounts/categories, transactions, dashboard, budgets, and payments. Cover ownership, validation, exact JPY calculations, and database effects. Use unit tests for isolated rules where useful and focused browser tests for UI-only confirmation/pending behavior. Use the chosen kit's test conventions and a dedicated PostgreSQL test database for integrity and concurrent-payment checks.
 - `.env` holds local configuration and secrets. `.env.example` should contain safe placeholders only. The existing `.gitignore` already ignores `.env`, other `.env.*` files except `.env.example`, dependency folders, and logs.
 
 ## Planned growth rule
 
-Create a folder only when it has a clear job. Keep deployment automation, a separate API, queues, and additional architectural layers for later requirements. Documentation belongs in `docs/` so design explanations remain easy to find without expanding the root README.
+Create an application folder only when an implemented feature needs it, following the chosen starter kit. A separate frontend/backend application, separate API, multi-currency scaffolding, queues, and custom architectural layers are outside the MVP plan. Documentation belongs in `docs/` so design explanations remain easy to find without expanding the root README.

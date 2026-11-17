@@ -8,18 +8,26 @@ Bills will help an individual answer: What money came in, what went out, what re
 
 The first planned release will use manual entry. This makes the data flow easier to understand and avoids requiring bank connections while you learn. Each person will see only their own records.
 
+The planned implementation will be one Laravel application using Laravel's official React starter kit, Inertia.js, TypeScript, Tailwind CSS, and PostgreSQL. See the [architecture](03-system-architecture.md) for the recommendation and official source. Bills will be built separately from MoneyWise.
+
 ## Planned first release
 
 | Planned feature | Planned behavior | Why start here? |
 | --- | --- | --- |
 | Registration, login, logout | Identify the current user and protect private pages | Financial records need an owner and access boundaries. |
-| Accounts | Track cash or bank accounts with an opening balance | Separate accounts make balances understandable. |
+| Accounts | Track cash or bank accounts with an opening balance and calculated current balance | The account page can complete the first functional milestone before a full dashboard exists. |
 | Categories | Create income and expense categories | Categories make spending summaries useful. |
 | Transactions | Add, view, edit, and delete income or expense entries | This is the core learning loop for forms, validation, and database queries. |
-| Dashboard | Show account balances and income/expense totals for a chosen month | Simple totals give useful feedback without advanced charts. |
+| Dashboard | Show current account balances plus selected-month income/expense totals | Simple totals give useful feedback without advanced charts. |
 | Monthly budgets | Set one spending limit per expense category per month and compare actual spending | This reuses transactions rather than introducing another ledger. |
 | Bill reminders | Store an amount, due date, account, and expense category; show upcoming or overdue bills | A separate reminder prevents unpaid bills from being counted as actual spending. |
-| Record bill payment | Create one expense transaction and link it to the bill | A single action reduces duplicate entry and makes payment status traceable. |
+| Record and undo bill payment | Create one expense and link it to the bill; explicitly undo both together when correcting a payment | Atomic changes keep reminders and expenses consistent, while server checks prevent duplicate payments. |
+
+## Planned delivery order
+
+Follow the [incremental roadmap](05-learning-roadmap.md): PHP fundamentals → PostgreSQL basics → Laravel setup → authentication → accounts/categories → transactions → dashboard → budgets → bill payments. Each implemented feature includes meaningful automated tests for its behavior and ownership rules.
+
+The **first functional milestone** ends at transactions: log in, create an account, record an expense, and view the updated balance on the account page. Category setup is offered during onboarding but may be skipped. The larger dashboard and other features follow later.
 
 ## Planned later possibilities
 
@@ -29,11 +37,13 @@ All of these remain planned and outside the proposed first release:
 - Recurring bill generation: requires rules for dates, missed occurrences, and duplicates.
 - Charts and CSV export/import: useful after the underlying records and calculations are trustworthy.
 - Email notifications: require scheduling, delivery configuration, and user preferences.
-- Multiple currencies, bank syncing, shared households, and investment tracking: introduce substantial extra rules and should wait until the core application is understood.
+- Bank syncing, shared households, and investment tracking: introduce substantial extra rules and should wait until the core application is understood.
+
+Multi-currency support and foreign-exchange conversion are outside the scope of this plan. Do not add currency selection, exchange-rate tables, or conversion features for the MVP.
 
 ## Proposed simplifying rules
 
-- Use one currency per user, shared by all their accounts. Choose its code and decimal precision before implementation; do not assume every currency has two decimal places. Currency conversion is outside the planned first release.
+- Use **JPY for every user and account**, with whole-yen inputs and display. Before migrations, choose the exact database representation, amount limits, and conversion rules between form input, PHP, PostgreSQL, and React. The [database plan](04-database-erd.md) explains the proposed choices; never use floating-point arithmetic for financial amounts or silently round fractional input.
 - Store positive transaction amounts with an explicit `income` or `expense` type. The type determines whether the balance increases or decreases.
 - Calculate an account's balance as opening balance + income − expenses. Do not maintain a second editable balance that can drift from the entries.
 - Use calendar dates for transaction dates and due dates. They represent financial days, not moments in a server's timezone.
