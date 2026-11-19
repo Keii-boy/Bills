@@ -4,6 +4,13 @@ export interface Auth {
     user: User;
 }
 
+export interface Account {
+    id: number;
+    name: string;
+    opening_balance: string;
+    current_balance: string;
+}
+
 export interface BreadcrumbItem {
     title: string;
     href: string;
