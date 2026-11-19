@@ -1,12 +1,13 @@
 import { Slot } from '@radix-ui/react-slot';
+import { router } from '@inertiajs/react';
 import { VariantProps, cva } from 'class-variance-authority';
-import { PanelLeft } from 'lucide-react';
+import { Menu, PanelLeft } from 'lucide-react';
 import * as React from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -14,9 +15,10 @@ import { cn } from '@/lib/utils';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar:state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = '16rem';
+const SIDEBAR_ID = 'app-sidebar';
+const SIDEBAR_WIDTH = '14.5rem';
 const SIDEBAR_WIDTH_MOBILE = '18rem';
-const SIDEBAR_WIDTH_ICON = '3rem';
+const SIDEBAR_WIDTH_ICON = '3.5rem';
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
 
 type SidebarContext = {
@@ -75,17 +77,14 @@ const SidebarProvider = React.forwardRef<
         return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
     }, [isMobile, setOpen, setOpenMobile]);
 
-    // Listen for mobile navigation events
     React.useEffect(() => {
-        const handleMobileNavigation = () => {
-            if (isMobile) {
-                setOpenMobile(false);
-            }
-        };
+        if (!isMobile) {
+            setOpenMobile(false);
+            return;
+        }
 
-        window.addEventListener('mobile-navigation', handleMobileNavigation);
-        return () => window.removeEventListener('mobile-navigation', handleMobileNavigation);
-    }, [isMobile, setOpenMobile]);
+        return router.on('navigate', () => setOpenMobile(false));
+    }, [isMobile]);
 
     // Adds a keyboard shortcut to toggle the sidebar.
     React.useEffect(() => {
@@ -120,20 +119,22 @@ const SidebarProvider = React.forwardRef<
     return (
         <SidebarContext.Provider value={contextValue}>
             <TooltipProvider delayDuration={0}>
-                <div
-                    style={
-                        {
-                            '--sidebar-width': SIDEBAR_WIDTH,
-                            '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
-                            ...style,
-                        } as React.CSSProperties
-                    }
-                    className={cn('group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar', className)}
-                    ref={ref}
-                    {...props}
-                >
-                    {children}
-                </div>
+                <Sheet open={openMobile} onOpenChange={setOpenMobile}>
+                    <div
+                        style={
+                            {
+                                '--sidebar-width': SIDEBAR_WIDTH,
+                                '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
+                                ...style,
+                            } as React.CSSProperties
+                        }
+                        className={cn('group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar', className)}
+                        ref={ref}
+                        {...props}
+                    >
+                        {children}
+                    </div>
+                </Sheet>
             </TooltipProvider>
         </SidebarContext.Provider>
     );
@@ -148,11 +149,16 @@ const Sidebar = React.forwardRef<
         collapsible?: 'offcanvas' | 'icon' | 'none';
     }
 >(({ side = 'left', variant = 'sidebar', collapsible = 'offcanvas', className, children, ...props }, ref) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+    const { isMobile, state } = useSidebar();
 
     if (collapsible === 'none') {
         return (
-            <div className={cn('flex h-full w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground', className)} ref={ref} {...props}>
+            <div
+                id={SIDEBAR_ID}
+                className={cn('flex h-full w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground', className)}
+                ref={ref}
+                {...props}
+            >
                 {children}
             </div>
         );
@@ -160,22 +166,21 @@ const Sidebar = React.forwardRef<
 
     if (isMobile) {
         return (
-            <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-                <SheetContent
-                    data-sidebar="sidebar"
-                    data-mobile="true"
-                    className="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
-                    style={
-                        {
-                            '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
-                        } as React.CSSProperties
-                    }
-                    side={side}
-                >
-                    <SheetTitle className="sr-only">Sidebar Navigation</SheetTitle>
-                    <div className="flex h-full w-full flex-col">{children}</div>
-                </SheetContent>
-            </Sheet>
+            <SheetContent
+                data-sidebar="sidebar"
+                data-mobile="true"
+                className="w-(--sidebar-width) max-w-[calc(100vw-1.5rem)] bg-sidebar p-0 text-sidebar-foreground [&>button]:top-3 [&>button]:right-3 [&>button]:grid [&>button]:size-11 [&>button]:place-items-center [&>button]:opacity-100"
+                style={
+                    {
+                        '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
+                    } as React.CSSProperties
+                }
+                side={side}
+            >
+                <SheetTitle className="sr-only">Bills navigation</SheetTitle>
+                <SheetDescription className="sr-only">Main and profile navigation.</SheetDescription>
+                <div className="flex h-full w-full flex-col">{children}</div>
+            </SheetContent>
         );
     }
 
@@ -191,7 +196,7 @@ const Sidebar = React.forwardRef<
             {/* This is what handles the sidebar gap on desktop */}
             <div
                 className={cn(
-                    'relative h-svh w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear',
+                    'relative h-svh w-(--sidebar-width) bg-transparent motion-safe:transition-[width] motion-safe:duration-150 motion-safe:ease-out',
                     'group-data-[collapsible=offcanvas]:w-0',
                     'group-data-[side=right]:rotate-180',
                     variant === 'floating' || variant === 'inset'
@@ -200,8 +205,9 @@ const Sidebar = React.forwardRef<
                 )}
             />
             <div
+                id={SIDEBAR_ID}
                 className={cn(
-                    'fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex',
+                    'border-sidebar-border fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) motion-safe:transition-[left,right,width] motion-safe:duration-150 motion-safe:ease-out md:flex',
                     side === 'left'
                         ? 'left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
                         : 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
@@ -227,25 +233,32 @@ Sidebar.displayName = 'Sidebar';
 
 const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.ComponentProps<typeof Button>>(
     ({ className, onClick, ...props }, ref) => {
-        const { toggleSidebar } = useSidebar();
+        const { isMobile, open, toggleSidebar } = useSidebar();
+        const Icon = isMobile ? Menu : PanelLeft;
 
-        return (
+        const trigger = (
             <Button
                 ref={ref}
                 data-sidebar="trigger"
+                type="button"
                 variant="ghost"
                 size="icon"
-                className={cn('h-7 w-7', className)}
+                aria-label={isMobile ? 'Open navigation' : open ? 'Collapse sidebar' : 'Expand sidebar'}
+                {...(!isMobile && { 'aria-controls': SIDEBAR_ID, 'aria-expanded': open })}
+                className={className}
                 onClick={(event) => {
                     onClick?.(event);
-                    toggleSidebar();
+                    if (!isMobile && !event.defaultPrevented) {
+                        toggleSidebar();
+                    }
                 }}
                 {...props}
             >
-                <PanelLeft />
-                <span className="sr-only">Toggle Sidebar</span>
+                <Icon aria-hidden="true" />
             </Button>
         );
+
+        return isMobile ? <SheetTrigger asChild>{trigger}</SheetTrigger> : trigger;
     },
 );
 SidebarTrigger.displayName = 'SidebarTrigger';
@@ -395,7 +408,7 @@ const SidebarMenuItem = React.forwardRef<HTMLLIElement, React.ComponentProps<'li
 SidebarMenuItem.displayName = 'SidebarMenuItem';
 
 const sidebarMenuButtonVariants = cva(
-    'peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-hidden ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
+    'peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-hidden ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
     {
         variants: {
             variant: {
@@ -438,7 +451,7 @@ const SidebarMenuButton = React.forwardRef<
         />
     );
 
-    if (!tooltip) {
+    if (!tooltip || state !== 'collapsed' || isMobile) {
         return button;
     }
 
@@ -451,7 +464,7 @@ const SidebarMenuButton = React.forwardRef<
     return (
         <Tooltip>
             <TooltipTrigger asChild>{button}</TooltipTrigger>
-            <TooltipContent side="right" align="center" hidden={state !== 'collapsed' || isMobile} {...tooltip} />
+            <TooltipContent side="right" align="center" {...tooltip} />
         </Tooltip>
     );
 });
