@@ -38,6 +38,13 @@ After an authorized first PR run, use the repository's branch protection rule or
 - Composer reported no advisories. Gitleaks found no leaks in Git history or the setup files. The npm gate found two critical, 13 high, and six moderate findings in the existing lockfile. Those dependencies need a separate scoped update before a green CI run can be expected. No frontend test script is configured. Hosted CI and the end-to-end feature remediation loop have yet to run.
 - Semgrep 1.186.0 scanned 100 tracked source files with zero findings. On Windows the direct registry fetch failed, so the local check fetched the same public OWASP rules separately and scanned using that file. GitHub CI uses the registry directly.
 
+## npm dependency remediation on 2026-11-23
+
+- The npm audit started with 24 affected package entries (2 critical, 13 high, 6 moderate, 3 low). The updated lockfile reports zero across all severities with and without dev dependencies.
+- Inertia's Axios path now resolves `axios@1.20.0`, `form-data@4.0.6`, and `follow-redirects@1.16.2`. Concurrently resolves `shell-quote@1.11.0` and `lodash@4.18.1`. [form-data advisory](https://github.com/advisories/GHSA-fjxv-7rqg-78g4) · [shell-quote advisory](https://github.com/advisories/GHSA-pqg4-j6r4-53mv) · [Lodash release notes](https://github.com/lodash/lodash/releases/tag/4.18.1)
+- Vite stays on major 6 at `6.4.5`. Its updated Rollup dependency supplies the matching Linux native package, so the separate `4.9.5` pin was removed. ESLint stays on major 9 to satisfy the installed React lint plugins' peer ranges. That release line has reached end of life. `typescript-eslint@8.73.0` brings in patched Minimatch through its own dependency range. [Vite advisory](https://github.com/advisories/GHSA-8g5g-mxqh-grgj) · [ESLint version support](https://eslint.org/version-support/) · [Minimatch advisory](https://github.com/advisories/GHSA-g3hv-75wg-m249)
+- A clean Windows install, the Vite client and SSR builds, TypeScript, ESLint, Prettier, and all seven Node frontend tests passed locally. Linux x64 glibc package resolution was checked from Windows. The Laravel suite passed 52 tests on SQLite in memory, with three PostgreSQL-only cases skipped. Hosted CI has yet to run for these changes.
+
 ## Security review checklist
 
 Use [OWASP ASVS 5.0 Level 2](https://owasp.org/projects/asvs/) as a verification target. Include affected controls and what the available evidence verifies. Deployment controls require evidence from the deployed environment.
