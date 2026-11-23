@@ -1,5 +1,6 @@
 import { Icon } from '@/components/icon';
-import { SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { SidebarGroup, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 import { type NavItem } from '@/types';
 
 export function NavFooter({
@@ -10,24 +11,21 @@ export function NavFooter({
     items: NavItem[];
 }) {
     return (
-        <SidebarGroup {...props} className={`group-data-[collapsible=icon]:p-0 ${className || ''}`}>
-            <SidebarGroupContent>
+        <SidebarGroup {...props} className={cn('p-0', className)}>
+            <nav aria-label="Project resources">
                 <SidebarMenu>
                     {items.map((item) => (
                         <SidebarMenuItem key={item.title}>
-                            <SidebarMenuButton
-                                asChild
-                                className="text-neutral-600 hover:text-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-100"
-                            >
+                            <SidebarMenuButton asChild tooltip={item.title} className="text-muted-foreground h-9 gap-3 px-3 text-xs">
                                 <a href={item.url} target="_blank" rel="noopener noreferrer">
-                                    {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
-                                    <span>{item.title}</span>
+                                    {item.icon && <Icon iconNode={item.icon} className="size-4" aria-hidden="true" />}
+                                    <span className="group-data-[collapsible=icon]:sr-only">{item.title}</span>
                                 </a>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                     ))}
                 </SidebarMenu>
-            </SidebarGroupContent>
+            </nav>
         </SidebarGroup>
     );
 }

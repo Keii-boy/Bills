@@ -1,0 +1,132 @@
+name: Bills CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Frontend quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm exec --no -- tsc --noEmit
+      - run: npm exec --no -- eslint .
+      - run: npm run format:check
+      - name: Frontend tests
+        run: |
+          if node -e "process.exit(require('./package.json').scripts?.test ? 0 : 1)"; then
+            npm test
+          else
+            echo 'Frontend tests skipped. No test script is configured.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - run: npm run build
+
+  backend:
+    name: Backend quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      APP_ENV: testing
+      APP_DEBUG: 'false'
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: bills_ci
+          POSTGRES_USER: bills_ci
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432/tcp
+        options: >-
+          --health-cmd "pg_isready -U bills_ci -d bills_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # 2.36.0
+        with:
+          php-version: '8.5'
+          extensions: mbstring, pdo_sqlite, pdo_pgsql
+          tools: composer:v2
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Build assets for Inertia feature tests
+        run: |
+          npm ci
+          npm run build
+      - name: Laravel tests on SQLite
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: |
+          export APP_KEY="base64:$(php -r 'echo base64_encode(random_bytes(32));')"
+          php artisan test
+      - name: Laravel tests on isolated PostgreSQL
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: ${{ job.services.postgres.ports['5432'] }}
+          DB_DATABASE: bills_ci
+          DB_USERNAME: bills_ci
+          DB_PASSWORD: postgres
+        run: |
+          export APP_KEY="base64:$(php -r 'echo base64_encode(random_bytes(32));')"
+          php artisan test
+
+  security:
+    name: Security checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        id: checkout
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # 2.36.0
+        id: php
+        with:
+          php-version: '8.5'
+          tools: composer:v2
+          coverage: none
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        id: node
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Composer advisory audit
+        if: ${{ !cancelled() && steps.php.outcome == 'success' }}
+        run: composer audit --locked --no-interaction
+      - name: npm advisory audit
+        if: ${{ !cancelled() && steps.node.outcome == 'success' }}
+        run: npm audit --audit-level=moderate
+      - name: Scan Git history for secrets
+        if: ${{ !cancelled() && steps.checkout.outcome == 'success' }}
+        run: go run github.com/zricethezav/gitleaks/v8@v8.30.0 git --redact --no-banner .
+      - name: Static security analysis
+        if: ${{ !cancelled() && steps.checkout.outcome == 'success' }}
+        run: >-
+          pipx run --spec semgrep==1.186.0 semgrep scan
+          --config p/owasp-top-ten --metrics off --disable-version-check --error --strict
+          app resources/js routes

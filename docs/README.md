@@ -15,6 +15,8 @@ Bills is a new project, separate from the old MoneyWise project. The planned sta
 5. [Step-by-step learning roadmap](05-learning-roadmap.md)
 6. [Recommended future folder structure](06-folder-structure.md)
 
+For current development and verification, see the [Bills development workflow](07-development-workflow.md).
+
 Read them in this order: understand the problem, follow a user's journey, see how the pieces connect, then study the data and learning steps.
 
 ## Original inspection snapshot (before documentation was added)
