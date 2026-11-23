@@ -30,6 +30,12 @@ Reason about tests before implementation. After a fix, rerun related tests and r
 
 After an authorized first PR run, use the repository's branch protection rule or ruleset for `main` to require a pull request and the **Frontend quality**, **Backend quality**, and **Security checks** status checks. Require the branch to be up to date before merging and keep merge approval with a human. Verify that the checks appear in GitHub after a real run. A local workflow check establishes configuration validity. Hosted execution and branch protection are confirmed in GitHub.
 
+### Clean checkouts
+
+`npm ci` supplies Ziggy's TypeScript declarations through the `ziggy-js` dev dependency. Keep its version aligned with `tightenco/ziggy` in `composer.lock`. The Blade `@routes` directive supplies the runtime `route()` helper before the frontend bundle loads.
+
+The `.gitignore` placeholders in `bootstrap/cache` and `storage/framework/views` keep those directories in a fresh checkout. Composer's package discovery writes to `bootstrap/cache`, and Laravel compiles Blade templates into `storage/framework/views`. Generated files in both directories are ignored.
+
 ## Setup verification on 2026-11-23
 
 - The installed Codex runtime (`0.171.0-alpha.13`) loaded both project roles in a fresh read-only CLI session. Both independently reviewed the Accounts diff in `99bf0a7` and reported their findings to the parent. The source and two-user tests establish owner-scoped reads and writes for the current routes. The security reviewer also flagged that previously viewed balance data may persist in browser history after logout. That browser behavior needs a separate verification task.
