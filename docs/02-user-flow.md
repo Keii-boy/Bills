@@ -1,6 +1,6 @@
 # Planned user flow
 
-The diagrams describe the planned MVP. The current Accounts screens cover listing, creating, and viewing owned accounts.
+The diagrams describe the planned MVP. The current Accounts and Dashboard screens show data owned by the signed-in user.
 
 ## Current Accounts flow
 
@@ -8,6 +8,12 @@ The diagrams describe the planned MVP. The current Accounts screens cover listin
 - The create form takes an account name and a whole-yen opening balance. It accepts zero and negative values within the 12-digit limit. A validation error keeps the entered values visible and moves focus to the first invalid field. Successful creation opens the account detail page.
 - The detail page shows the current balance prominently and labels the opening balance as the starting point before recorded activity. Both currently show the same amount because transactions are a later milestone. Laravel sends whole-yen strings, and the interface formats them for display.
 - Entering an Accounts screen moves focus to its heading so keyboard users can continue into the page. A validation response keeps focus handling within the form.
+
+## Current Dashboard flow
+
+- The Dashboard shows the sum of the signed-in user's current account balances and links each row to its account details. Laravel uses the same balance value as Accounts and sends both the total and the row balances as exact whole-yen strings.
+- An empty Dashboard shows ¥0 and links to account creation. An account with a ¥0 balance is still listed in Accounts overview.
+- Dashboard links fetch fresh data on navigation. The response uses `Cache-Control: private, no-store`. Inertia encrypts Dashboard history on loopback or when Laravel detects HTTPS. Logout and profile deletion clear the key in the tab that processes the response.
 
 ## Planned login and first-time setup
 

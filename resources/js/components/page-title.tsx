@@ -2,7 +2,7 @@ function focusTitle(heading: HTMLHeadingElement | null) {
     heading?.focus({ preventScroll: true });
 }
 
-export default function AccountPageTitle({ children }: { children: string }) {
+export default function PageTitle({ children }: { children: string }) {
     return (
         <h1
             ref={focusTitle}

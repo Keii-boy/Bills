@@ -1,5 +1,5 @@
-import AccountPageTitle from '@/components/account-page-title';
 import InputError from '@/components/input-error';
+import PageTitle from '@/components/page-title';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -50,7 +50,7 @@ export default function CreateAccount() {
             <Head title="Create account" />
 
             <div className="mx-auto w-full max-w-2xl space-y-6 px-4 py-6 sm:px-6 md:space-y-8 md:px-8 md:py-10">
-                <AccountPageTitle>Create account</AccountPageTitle>
+                <PageTitle>Create account</PageTitle>
 
                 <Card>
                     <form method="post" onSubmit={submit} aria-busy={processing}>

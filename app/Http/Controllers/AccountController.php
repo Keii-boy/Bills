@@ -51,7 +51,7 @@ class AccountController extends Controller
             'id' => $account->id,
             'name' => $account->name,
             'opening_balance' => $account->opening_balance,
-            'current_balance' => $account->opening_balance,
+            'current_balance' => $account->currentBalance(),
         ];
     }
 }
