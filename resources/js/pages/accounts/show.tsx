@@ -1,10 +1,11 @@
-import Heading from '@/components/heading';
+import AccountPageTitle from '@/components/account-page-title';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { formatYen } from '@/lib/format-yen';
 import { type Account } from '@/types';
 import { Head, Link } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
 
 export default function ShowAccount({ account }: { account: Account }) {
     const accountsUrl = route('accounts.index');
@@ -16,31 +17,35 @@ export default function ShowAccount({ account }: { account: Account }) {
                 { title: account.name, href: route('accounts.show', account.id) },
             ]}
         >
-            <Head title={account.name} />
+            <Head title="Account details" />
 
-            <div className="w-full max-w-4xl p-4 md:p-6">
-                <div className="flex flex-wrap items-start justify-between gap-x-4">
-                    <div className="min-w-0 break-words">
-                        <Heading title={account.name} />
-                    </div>
-                    <Button asChild variant="outline">
-                        <Link href={accountsUrl}>Back to accounts</Link>
+            <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6 md:space-y-8 md:px-8 md:py-10">
+                <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <AccountPageTitle>{account.name}</AccountPageTitle>
+                    <Button asChild variant="ghost" className="-ml-3 shrink-0 self-start px-3 sm:ml-0">
+                        <Link href={accountsUrl}>
+                            <ArrowLeft aria-hidden="true" />
+                            Back to accounts
+                        </Link>
                     </Button>
-                </div>
+                </header>
 
-                <Card>
-                    <CardContent className="p-6">
-                        <dl className="grid gap-6 sm:grid-cols-2">
-                            <div>
-                                <dt className="text-muted-foreground text-sm">Current balance</dt>
-                                <dd className="mt-1 text-2xl font-semibold tabular-nums">{formatYen(account.current_balance)}</dd>
-                            </div>
-                            <div>
-                                <dt className="text-muted-foreground text-sm">Opening balance</dt>
-                                <dd className="mt-1 text-2xl font-semibold tabular-nums">{formatYen(account.opening_balance)}</dd>
-                            </div>
-                        </dl>
-                    </CardContent>
+                <Card className="overflow-hidden">
+                    <dl className="grid md:grid-cols-[3fr_2fr]">
+                        <div className="bg-accent text-accent-foreground min-w-0 px-4 py-8 sm:px-6 md:p-8">
+                            <dt className="text-sm font-medium">Current balance</dt>
+                            <dd className="mt-2 text-3xl font-semibold tracking-tight break-words tabular-nums sm:text-4xl">
+                                {formatYen(account.current_balance)}
+                            </dd>
+                        </div>
+                        <div className="min-w-0 border-t p-4 sm:p-6 md:border-t-0 md:border-l md:p-8">
+                            <dt className="text-muted-foreground text-sm font-medium">Opening balance</dt>
+                            <dd className="mt-2 text-2xl font-semibold tracking-tight break-words tabular-nums">
+                                {formatYen(account.opening_balance)}
+                            </dd>
+                            <dd className="text-muted-foreground mt-2 text-sm">Starting balance before recorded activity.</dd>
+                        </div>
+                    </dl>
                 </Card>
             </div>
         </AppLayout>

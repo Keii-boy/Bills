@@ -55,6 +55,21 @@ class AccountRoutesTest extends TestCase
         );
     }
 
+    public function test_invalid_opening_balance_returns_to_the_form_with_both_entries(): void
+    {
+        $input = ['name' => 'Cash', 'opening_balance' => '-1200.5'];
+
+        $this->actingAs(User::factory()->create())
+            ->from(route('accounts.create'))
+            ->post(route('accounts.store'), $input)
+            ->assertRedirectToRoute('accounts.create')
+            ->assertSessionHasErrors(['opening_balance'])
+            ->assertSessionHasInput('name', $input['name'])
+            ->assertSessionHasInput('opening_balance', $input['opening_balance']);
+
+        $this->assertDatabaseCount('accounts', 0);
+    }
+
     #[DataProvider('validOpeningBalances')]
     public function test_store_uses_the_signed_in_user_and_shows_string_balances(string $balance): void
     {
