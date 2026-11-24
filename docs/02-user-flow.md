@@ -1,6 +1,13 @@
 # Planned user flow
 
-**Status: every screen and action in these diagrams is planned.**
+The diagrams describe the planned MVP. The current Accounts screens cover listing, creating, and viewing owned accounts.
+
+## Current Accounts flow
+
+- The Accounts list shows each account's current balance. With no accounts, the page links directly to the create form. Each account row is a keyboard-accessible link that stacks its name and balance on narrow screens.
+- The create form takes an account name and a whole-yen opening balance. It accepts zero and negative values within the 12-digit limit. A validation error keeps the entered values visible and moves focus to the first invalid field. Successful creation opens the account detail page.
+- The detail page shows the current balance prominently and labels the opening balance as the starting point before recorded activity. Both currently show the same amount because transactions are a later milestone. Laravel sends whole-yen strings, and the interface formats them for display.
+- Entering an Accounts screen moves focus to its heading so keyboard users can continue into the page. A validation response keeps focus handling within the form.
 
 ## Planned login and first-time setup
 
