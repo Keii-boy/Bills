@@ -4,11 +4,18 @@ export interface Auth {
     user: User;
 }
 
-export interface Account {
-    id: number;
+export interface AccountBalance {
     name: string;
-    opening_balance: string;
     current_balance: string;
+}
+
+export interface AccountBalanceLink extends AccountBalance {
+    href: string;
+}
+
+export interface Account extends AccountBalance {
+    id: number;
+    opening_balance: string;
 }
 
 export interface BreadcrumbItem {
@@ -27,6 +34,7 @@ export interface NavItem {
     icon?: LucideIcon | null;
     isActive?: boolean;
     matchChildren?: boolean;
+    prefetch?: boolean;
 }
 
 export interface SharedData {

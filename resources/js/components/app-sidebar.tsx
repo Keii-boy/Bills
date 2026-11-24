@@ -27,6 +27,7 @@ const mainNavItems: NavItem[] = [
         url: '/accounts',
         icon: Wallet,
         matchChildren: true,
+        prefetch: true,
     },
 ];
 
@@ -50,7 +51,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" tooltip="Bills dashboard" className="gap-3 px-2" asChild>
-                            <Link href="/dashboard" aria-label="Bills dashboard" prefetch>
+                            <Link href="/dashboard" aria-label="Bills dashboard">
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

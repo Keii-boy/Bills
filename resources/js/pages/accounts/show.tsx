@@ -1,4 +1,4 @@
-import AccountPageTitle from '@/components/account-page-title';
+import PageTitle from '@/components/page-title';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
@@ -21,7 +21,7 @@ export default function ShowAccount({ account }: { account: Account }) {
 
             <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6 md:space-y-8 md:px-8 md:py-10">
                 <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <AccountPageTitle>{account.name}</AccountPageTitle>
+                    <PageTitle>{account.name}</PageTitle>
                     <Button asChild variant="ghost" className="-ml-3 shrink-0 self-start px-3 sm:ml-0">
                         <Link href={accountsUrl}>
                             <ArrowLeft aria-hidden="true" />

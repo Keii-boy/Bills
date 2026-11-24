@@ -66,5 +66,6 @@ class AuthenticationTest extends TestCase
 
         $this->assertGuest();
         $response->assertRedirect('/');
+        $this->assertTrue($this->get('/')->inertiaPage()['clearHistory']);
     }
 }

@@ -17,6 +17,11 @@ class Account extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function currentBalance(): string
+    {
+        return $this->opening_balance;
+    }
+
     protected function casts(): array
     {
         return [
